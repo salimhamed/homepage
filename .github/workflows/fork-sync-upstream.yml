@@ -1,0 +1,99 @@
+# Requires "Allow GitHub Actions to create and approve pull requests"
+# (Settings -> Actions -> General -> Workflow permissions); `gh pr create` fails without it.
+name: "Fork: sync upstream"
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+env:
+  UPSTREAM_URL: https://github.com/gethomepage/homepage.git
+  FORK_BRANCH: villaalba
+
+jobs:
+  sync:
+    name: Rebase onto newest upstream tag
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout fork branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: villaalba
+          fetch-depth: 0
+
+      - name: Fetch upstream
+        run: |
+          git remote add upstream "$UPSTREAM_URL"
+          git fetch upstream --tags --force
+
+      - name: Resolve base and latest upstream tags
+        id: tags
+        run: |
+          BASE=$(git describe --tags --abbrev=0 --match 'v*' "$(git merge-base HEAD upstream/main)")
+          LATEST=$(git tag --list 'v*' --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
+          echo "base=$BASE" >> "$GITHUB_OUTPUT"
+          echo "latest=$LATEST" >> "$GITHUB_OUTPUT"
+          if [ "$BASE" = "$LATEST" ]; then
+            echo "up_to_date=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Fork is already rebased onto $BASE, the newest upstream release."
+          fi
+
+      # Checked before rebasing: re-pushing the branch daily would dismiss reviews
+      # and discard any conflict fixes pushed to the open PR.
+      - name: Look for an open sync pull request
+        id: pr
+        if: steps.tags.outputs.up_to_date != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # gh resolves the parent repo by default in a fork checkout; pin it to this fork.
+          GH_REPO: ${{ github.repository }}
+          LATEST: ${{ steps.tags.outputs.latest }}
+        run: |
+          EXISTING=$(gh pr list --base "$FORK_BRANCH" --head "sync/$LATEST" --state open --json number --jq '.[0].number // empty')
+          echo "existing=$EXISTING" >> "$GITHUB_OUTPUT"
+          if [ -n "$EXISTING" ]; then
+            echo "::notice::PR #$EXISTING is already open for sync/$LATEST; leaving the branch untouched."
+          fi
+
+      - name: Rebase fork patches
+        if: steps.tags.outputs.up_to_date != 'true' && steps.pr.outputs.existing == ''
+        env:
+          LATEST: ${{ steps.tags.outputs.latest }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "sync/$LATEST"
+          if ! git rebase "$LATEST"; then
+            CONFLICTS=$(git diff --name-only --diff-filter=U | tr '\n' ' ')
+            git rebase --abort || true
+            if [ -n "$CONFLICTS" ]; then
+              echo "::error::Rebase onto $LATEST conflicts in: $CONFLICTS -- rebase manually."
+            else
+              echo "::error::git rebase onto $LATEST failed; see the log above."
+            fi
+            exit 1
+          fi
+          git push --force-with-lease origin "sync/$LATEST"
+
+      - name: Open pull request
+        if: steps.tags.outputs.up_to_date != 'true' && steps.pr.outputs.existing == ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # gh resolves the parent repo by default in a fork checkout; pin it to this fork.
+          GH_REPO: ${{ github.repository }}
+          BASE: ${{ steps.tags.outputs.base }}
+          LATEST: ${{ steps.tags.outputs.latest }}
+        run: |
+          BODY=$(cat <<EOF
+          Rebases the fork patches from \`$BASE\` onto \`$LATEST\`.
+
+          Upstream release: https://github.com/gethomepage/homepage/releases/tag/$LATEST
+          EOF
+          )
+          gh pr create --base "$FORK_BRANCH" --head "sync/$LATEST" \
+            --title "Sync fork to $LATEST" --body "$BODY"
