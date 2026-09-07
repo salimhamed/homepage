@@ -38,6 +38,10 @@ const SignOut = dynamic(() => import("components/toggles/signout"), {
   ssr: false,
 });
 
+const TailscaleToggle = dynamic(() => import("components/toggles/tailscale"), {
+  ssr: false,
+});
+
 const Version = dynamic(() => import("components/version"), {
   ssr: false,
 });
@@ -231,6 +235,11 @@ function Home({ initialSettings }) {
 
   const servicesAndBookmarks = [...bookmarks.map((bg) => bg.bookmarks).flat(), ...getAllServices(services)].filter(
     (i) => i?.href,
+  );
+
+  const hasTailscaleLinks = useMemo(
+    () => getAllServices(services).some((service) => service.tailscaleHref),
+    [services],
   );
 
   useEffect(() => {
@@ -503,6 +512,8 @@ function Home({ initialSettings }) {
                 </div>
               </>
             )}
+
+            <TailscaleToggle hasTailscaleLinks={hasTailscaleLinks} />
           </div>
         </div>
 

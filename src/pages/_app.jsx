@@ -11,6 +11,7 @@ import nextI18nextConfig from "../../next-i18next.config";
 import { ColorProvider } from "utils/contexts/color";
 import { SettingsProvider } from "utils/contexts/settings";
 import { TabProvider } from "utils/contexts/tab";
+import { TailscaleProvider } from "utils/contexts/tailscale";
 import { ThemeProvider } from "utils/contexts/theme";
 
 const tailwindSafelist = [
@@ -88,9 +89,11 @@ function MyApp({ Component, pageProps }) {
         <ColorProvider>
           <ThemeProvider>
             <SettingsProvider>
-              <TabProvider>
-                <Component {...pageProps} />
-              </TabProvider>
+              <TailscaleProvider>
+                <TabProvider>
+                  <Component {...pageProps} />
+                </TabProvider>
+              </TailscaleProvider>
             </SettingsProvider>
           </ThemeProvider>
         </ColorProvider>

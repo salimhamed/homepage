@@ -60,6 +60,20 @@ Services are defined as array entries on groups,
 
 <img width="1038" alt="Service Services" src="https://user-images.githubusercontent.com/82196/187040763-038023a2-8bee-4d87-b5cc-13447e7365a4.png">
 
+### Tailscale Links
+
+Services may have an optional `tailscaleHref` property holding an alternate URL, typically the service's address on
+your tailnet. A "Tailscale" toggle appears in the header whenever at least one service defines it; while the toggle is
+on, every card opens its `tailscaleHref` instead of its `href`. Cards without a `tailscaleHref` are dimmed and still
+open their `href`.
+
+```yaml
+- Sonarr:
+    icon: sonarr.png
+    href: https://sonarr.example.com/
+    tailscaleHref: http://host.tail1234.ts.net:8989
+```
+
 ### Service Widgets
 
 Each service can have widgets attached to it (often matching the service type, but that's not forced).

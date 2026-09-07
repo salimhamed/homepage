@@ -1258,5 +1258,9 @@
         "wanted": "Wanted",
         "queued": "Queued",
         "leagues": "Leagues"
+    },
+    "tailscaleLinks": {
+        "toggle": "Tailscale",
+        "noHref": "No Tailscale URL configured; opens public URL"
     }
 }

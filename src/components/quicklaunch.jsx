@@ -8,6 +8,8 @@ import ResolvedIcon from "./resolvedicon";
 import { getStoredProvider, searchProviders } from "./widgets/search/search";
 
 import { SettingsContext } from "utils/contexts/settings";
+import { TailscaleContext } from "utils/contexts/tailscale";
+import resolveHref from "utils/tailscale-href";
 
 const MOBILE_BUTTON_POSITIONS = {
   "top-left": "top-4 left-4",
@@ -83,6 +85,7 @@ export default function QuickLaunch({ servicesAndBookmarks, searchString, setSea
   const { t } = useTranslation();
 
   const { settings } = useContext(SettingsContext);
+  const { useTailscale } = useContext(TailscaleContext);
   const { searchDescriptions = false, hideVisitURL = false } = settings?.quicklaunch ?? {};
 
   const searchField = useRef();
@@ -127,7 +130,7 @@ export default function QuickLaunch({ servicesAndBookmarks, searchString, setSea
   function openCurrentItem(newWindow, index = activeItemIndex) {
     const result = results[index];
     window.open(
-      result.href,
+      resolveHref(result, useTailscale),
       newWindow ? "_blank" : (result.target ?? searchProvider?.target ?? settings.target ?? "_blank"),
       "noreferrer",
     );

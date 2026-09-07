@@ -163,6 +163,41 @@ describe("components/quicklaunch", () => {
     openSpy.mockRestore();
   });
 
+  it("opens the tailscale href when tailscale links are on", async () => {
+    const openSpy = vi.spyOn(window, "open").mockImplementation(() => null);
+
+    renderWithProviders(
+      <Wrapper
+        servicesAndBookmarks={[
+          { name: "Sonarr", href: "https://sonarr.example.com/", tailscaleHref: "https://sonarr.ts.net/" },
+        ]}
+      />,
+      {
+        settings: {
+          target: "_self",
+          quicklaunch: { provider: "duckduckgo", showSearchSuggestions: false },
+        },
+        useTailscale: true,
+      },
+    );
+
+    const input = screen.getByPlaceholderText("Search");
+    await waitFor(() => expect(input).toHaveFocus());
+
+    fireEvent.change(input, { target: { value: "sonarr" } });
+    expect(await screen.findByText("Sonarr")).toBeInTheDocument();
+
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 350));
+    });
+
+    expect(openSpy).toHaveBeenCalledWith("https://sonarr.ts.net/", "_self", "noreferrer");
+
+    openSpy.mockRestore();
+  });
+
   it("does not carry a previous url result into a search seeded by a keypress", async () => {
     renderWithProviders(<Wrapper />, {
       settings: {
