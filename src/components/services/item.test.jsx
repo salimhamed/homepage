@@ -227,6 +227,76 @@ describe("components/services/item", () => {
     expect(screen.getByTestId("proxmoxvm-widget")).toBeInTheDocument();
   });
 
+  it("uses href when tailscale links are off", () => {
+    renderWithProviders(
+      <Item
+        groupName="G"
+        useEqualHeights={false}
+        service={{
+          id: "svc1",
+          name: "My Service",
+          href: "https://example.com",
+          tailscaleHref: "https://example.ts.net",
+          icon: "mdi:test",
+          widgets: [],
+        }}
+      />,
+      { settings: { showStats: false, statusStyle: "basic" }, useTailscale: false },
+    );
+
+    screen.getAllByRole("link").forEach((link) => {
+      expect(link).toHaveAttribute("href", "https://example.com");
+      expect(link).not.toHaveAttribute("title");
+    });
+  });
+
+  it("uses tailscaleHref when tailscale links are on", () => {
+    renderWithProviders(
+      <Item
+        groupName="G"
+        useEqualHeights={false}
+        service={{
+          id: "svc1",
+          name: "My Service",
+          href: "https://example.com",
+          tailscaleHref: "https://example.ts.net",
+          icon: "mdi:test",
+          widgets: [],
+        }}
+      />,
+      { settings: { showStats: false, statusStyle: "basic" }, useTailscale: true },
+    );
+
+    const links = screen.getAllByRole("link");
+    expect(links).toHaveLength(2);
+    links.forEach((link) => {
+      expect(link).toHaveAttribute("href", "https://example.ts.net");
+      expect(link).not.toHaveAttribute("title");
+    });
+  });
+
+  it("disables the link and explains why when tailscaleHref is missing", () => {
+    renderWithProviders(
+      <Item
+        groupName="G"
+        useEqualHeights={false}
+        service={{
+          id: "svc1",
+          name: "My Service",
+          href: "https://example.com",
+          icon: "mdi:test",
+          widgets: [],
+        }}
+      />,
+      { settings: { showStats: false, statusStyle: "basic" }, useTailscale: true },
+    );
+
+    expect(screen.queryAllByRole("link")).toHaveLength(0);
+    expect(document.querySelector(".service-title")).toHaveAttribute("title", "tailscaleLinks.noHref");
+    expect(document.querySelector(".service-title")).toHaveClass("cursor-not-allowed");
+    expect(document.querySelector(".service-card")).toHaveClass("opacity-40", "grayscale");
+  });
+
   it("does not render the app status tag when the service is marked external", () => {
     renderWithProviders(
       <Item
