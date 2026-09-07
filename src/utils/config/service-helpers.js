@@ -733,6 +733,9 @@ export function cleanServiceGroups(groups) {
             widget.interval = interval;
           }
         }
+        if (type === "tasmota") {
+          if (refreshInterval) widget.refreshInterval = refreshInterval;
+        }
         return widget;
       });
       return cleanedService;

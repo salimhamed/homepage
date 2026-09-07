@@ -133,6 +133,7 @@ import swagdashboard from "./swagdashboard/widget";
 import syncthing from "./syncthing/widget";
 import tailscale from "./tailscale/widget";
 import tandoor from "./tandoor/widget";
+import tasmota from "./tasmota/widget";
 import tautulli from "./tautulli/widget";
 import tdarr from "./tdarr/widget";
 import technitium from "./technitium/widget";
@@ -298,6 +299,7 @@ const widgets = {
   syncthing,
   tailscale,
   tandoor,
+  tasmota,
   tautulli,
   technitium,
   tdarr,

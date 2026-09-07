@@ -1262,5 +1262,10 @@
     "tailscaleLinks": {
         "toggle": "Tailscale",
         "noHref": "No Tailscale URL configured; opens public URL"
+    },
+    "tasmota": {
+        "power": "Power",
+        "on": "On",
+        "off": "Off"
     }
 }
