@@ -1,0 +1,96 @@
+name: "Fork: build and publish"
+
+on:
+  push:
+    branches:
+      - villaalba
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: ghcr.io/salimhamed/homepage
+  FORK_REPO_URL: https://github.com/salimhamed/homepage
+
+jobs:
+  build:
+    name: Build & Push
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: 10
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
+        with:
+          node-version: 22
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test
+
+      - name: Read package version
+        id: pkg
+        run: echo "version=$(node -p "require('./package.json').version.replace(/^v/, '')")" >> "$GITHUB_OUTPUT"
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=villaalba
+            type=raw,value=villaalba-${{ steps.pkg.outputs.version }}
+            type=sha
+          labels: |
+            org.opencontainers.image.source=${{ env.FORK_REPO_URL }}
+            org.opencontainers.image.url=${{ env.FORK_REPO_URL }}
+          flavor: |
+            latest=false
+
+      # The Dockerfile skips its own install/build when CI=true and consumes this .next/ from the build context.
+      # NEXT_PUBLIC_* values are inlined at build time, so they cannot be set on the container later.
+      - name: Build app
+        env:
+          NEXT_PUBLIC_VERSION: villaalba-${{ steps.pkg.outputs.version }}
+          NEXT_PUBLIC_REVISION: ${{ github.sha }}
+          NEXT_PUBLIC_BUILDTIME: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+        run: pnpm build
+
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4
+
+      - name: Log into ghcr.io
+        uses: docker/login-action@abd2ef45e78c5afb21d64d4ca52ee8550d9572c7 # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            CI=true
+          platforms: linux/amd64
+          provenance: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
