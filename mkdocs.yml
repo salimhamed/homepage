@@ -169,6 +169,7 @@ nav:
           - widgets/services/syncthing.md
           - widgets/services/tailscale.md
           - widgets/services/tandoor.md
+          - widgets/services/tasmota.md
           - widgets/services/technitium.md
           - widgets/services/tdarr.md
           - widgets/services/traefik.md
