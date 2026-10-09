@@ -44,7 +44,7 @@ describe("components/toggles/tailscale", () => {
     expect(screen.getByRole("button")).toBeInTheDocument();
   });
 
-  it("labels the toggle for screen readers", () => {
+  it("shows a visible label", () => {
     renderToggle(false, vi.fn());
 
     expect(screen.getByRole("button")).toHaveTextContent("tailscaleLinks.toggle");

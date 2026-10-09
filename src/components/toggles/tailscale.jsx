@@ -25,12 +25,14 @@ export default function TailscaleToggle({ hasTailscaleLinks }) {
           className="flex outline-hidden"
         >
           <MdVpnLock className="text-theme-800 dark:text-theme-200 w-5 h-5 m-1.5" />
+          <span className="self-center mr-1.5 text-sm font-medium text-theme-800 dark:text-theme-200 cursor-pointer">
+            {t("tailscaleLinks.toggle")}
+          </span>
           {useTailscale ? (
             <MdToggleOn className="text-theme-800 dark:text-theme-200 w-8 h-8 cursor-pointer" />
           ) : (
             <MdToggleOff className="text-theme-800 dark:text-theme-200 w-8 h-8 cursor-pointer" />
           )}
-          <span className="sr-only">{t("tailscaleLinks.toggle")}</span>
         </button>
         <div
           id="tailscale-toggle-help"
