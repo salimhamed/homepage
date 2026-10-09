@@ -26,6 +26,10 @@ Runs on every push to `villaalba` and on demand. Lints, tests, builds the Next.j
 builds the image with `CI=true` (the `Dockerfile` skips its own install/build and consumes the prebuilt
 `.next/` from the build context) and pushes to GHCR.
 
+It logs in to Docker Hub before building so base-image pulls aren't rate limited. That needs the repo
+secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` (a Docker Hub personal access token with
+**Public Repo Read-only** access).
+
 Image: `ghcr.io/salimhamed/homepage`
 
 | Tag                   | Meaning                                                        |
