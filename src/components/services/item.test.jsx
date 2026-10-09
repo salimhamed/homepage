@@ -275,7 +275,7 @@ describe("components/services/item", () => {
     });
   });
 
-  it("falls back to href and explains why when tailscaleHref is missing", () => {
+  it("disables the link and explains why when tailscaleHref is missing", () => {
     renderWithProviders(
       <Item
         groupName="G"
@@ -291,12 +291,9 @@ describe("components/services/item", () => {
       { settings: { showStats: false, statusStyle: "basic" }, useTailscale: true },
     );
 
-    const links = screen.getAllByRole("link");
-    expect(links).toHaveLength(2);
-    links.forEach((link) => {
-      expect(link).toHaveAttribute("href", "https://example.com");
-      expect(link).toHaveAttribute("title", "tailscaleLinks.noHref");
-    });
+    expect(screen.queryAllByRole("link")).toHaveLength(0);
+    expect(document.querySelector(".service-title")).toHaveAttribute("title", "tailscaleLinks.noHref");
+    expect(document.querySelector(".service-title")).toHaveClass("cursor-not-allowed");
     expect(document.querySelector(".service-card")).toHaveClass("opacity-40", "grayscale");
   });
 

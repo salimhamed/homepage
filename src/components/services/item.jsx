@@ -24,6 +24,7 @@ export default function Item({ service, groupName, useEqualHeights }) {
   const effectiveHref = resolveHref(service, useTailscale);
   const hasLink = effectiveHref && effectiveHref !== "#";
   const missingTailscaleHref = Boolean(useTailscale && hasLink && !service.tailscaleHref);
+  const isLinked = hasLink && !missingTailscaleHref;
   const showStats = service.showStats === false ? false : settings.showStats;
   const statusStyle = service.statusStyle !== undefined ? service.statusStyle : settings.statusStyle;
   const [statsOpen, setStatsOpen] = useState(service.showStats);
@@ -50,14 +51,16 @@ export default function Item({ service, groupName, useEqualHeights }) {
           "transition-all mb-2 p-1 rounded-md font-medium text-theme-700 dark:text-theme-200 dark:hover:text-theme-300 shadow-md shadow-theme-900/10 dark:shadow-theme-900/20 bg-theme-100/20 hover:bg-theme-300/20 dark:bg-white/5 dark:hover:bg-white/10 relative overflow-clip service-card",
         )}
       >
-        <div className="flex select-none z-0 service-title">
+        <div
+          className={classNames("flex select-none z-0 service-title", missingTailscaleHref && "cursor-not-allowed")}
+          title={missingTailscaleHref ? t("tailscaleLinks.noHref") : undefined}
+        >
           {service.icon &&
-            (hasLink ? (
+            (isLinked ? (
               <a
                 href={effectiveHref}
                 target={service.target ?? settings.target ?? "_blank"}
                 rel="noreferrer"
-                title={missingTailscaleHref ? t("tailscaleLinks.noHref") : undefined}
                 className="shrink-0 flex items-center justify-center w-12 service-icon z-10"
                 aria-label={service.icon}
               >
@@ -69,12 +72,11 @@ export default function Item({ service, groupName, useEqualHeights }) {
               </div>
             ))}
 
-          {hasLink ? (
+          {isLinked ? (
             <a
               href={effectiveHref}
               target={service.target ?? settings.target ?? "_blank"}
               rel="noreferrer"
-              title={missingTailscaleHref ? t("tailscaleLinks.noHref") : undefined}
               className="flex-1 flex items-center justify-between rounded-r-md service-title-text"
             >
               <div className="flex-1 px-2 py-2 text-sm text-left z-10 service-name">

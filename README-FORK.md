@@ -6,11 +6,11 @@ future tags.
 
 ## Patch series
 
-| Patch           | What it adds                                                                                                                                                                                             |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tailscale links | Per-service `tailscaleHref` in `services.yaml` plus a footer toggle that swaps every card's link to its tailnet URL. Services without a `tailscaleHref` are faded and greyed out while the toggle is on. |
-| Tasmota widget  | A `tasmota` service widget showing power state with a click-to-toggle switch.                                                                                                                            |
-| Fork CI         | The two workflows below.                                                                                                                                                                                 |
+| Patch           | What it adds                                                                                                                                                                                                          |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tailscale links | Per-service `tailscaleHref` in `services.yaml` plus a footer toggle that swaps every card's link to its tailnet URL. Services without a `tailscaleHref` are faded, greyed out and unclickable while the toggle is on. |
+| Tasmota widget  | A `tasmota` service widget showing power state with a click-to-toggle switch.                                                                                                                                         |
+| Fork CI         | The two workflows below.                                                                                                                                                                                              |
 
 Everything else is upstream. The patches add new files wherever possible and touch as few upstream files as
 possible to keep rebases cheap.
