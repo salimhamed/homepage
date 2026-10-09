@@ -297,7 +297,7 @@ describe("components/services/item", () => {
       expect(link).toHaveAttribute("href", "https://example.com");
       expect(link).toHaveAttribute("title", "tailscaleLinks.noHref");
     });
-    expect(document.querySelector(".service-card")).toHaveClass("opacity-60");
+    expect(document.querySelector(".service-card")).toHaveClass("opacity-40", "grayscale");
   });
 
   it("does not render the app status tag when the service is marked external", () => {
