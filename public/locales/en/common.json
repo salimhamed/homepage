@@ -1261,7 +1261,11 @@
     },
     "tailscaleLinks": {
         "toggle": "Tailscale",
-        "noHref": "No Tailscale URL configured; opens public URL"
+        "noHref": "No Tailscale URL configured; opens public URL",
+        "helpTitleOff": "Tailscale links: off",
+        "helpOff": "Services open at their regular URLs. Turn on when you're away from home to open them through their Tailscale addresses instead.",
+        "helpTitleOn": "Tailscale links: on",
+        "helpOn": "Services open through their Tailscale addresses. Dimmed services have no Tailscale address and use their regular URL."
     },
     "tasmota": {
         "power": "Power",

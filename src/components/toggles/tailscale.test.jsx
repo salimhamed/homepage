@@ -49,4 +49,24 @@ describe("components/toggles/tailscale", () => {
 
     expect(screen.getByRole("button")).toHaveTextContent("tailscaleLinks.toggle");
   });
+
+  it("reports its state to assistive tech", () => {
+    renderToggle(true, vi.fn());
+
+    expect(screen.getByRole("button")).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("explains the current mode in a tooltip", () => {
+    const { rerender } = renderToggle(false, vi.fn());
+
+    expect(screen.getByRole("tooltip", { hidden: true })).toHaveTextContent("tailscaleLinks.helpOff");
+    expect(screen.getByRole("button")).toHaveAttribute("aria-describedby", "tailscale-toggle-help");
+
+    rerender(
+      <TailscaleContext.Provider value={{ useTailscale: true, setUseTailscale: vi.fn() }}>
+        <TailscaleToggle hasTailscaleLinks />
+      </TailscaleContext.Provider>,
+    );
+    expect(screen.getByRole("tooltip", { hidden: true })).toHaveTextContent("tailscaleLinks.helpOn");
+  });
 });
